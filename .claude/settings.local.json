@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(uv pip list:*)",
+      "Bash(uv run:*)",
+      "Bash(find:*)",
+      "Bash(tree:*)",
+      "Bash(cat:*)",
+      "Bash(unzip:*)",
+      "Bash(uv sync:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
