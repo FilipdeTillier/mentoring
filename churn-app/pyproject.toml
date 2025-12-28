@@ -12,6 +12,7 @@ dependencies = [
     "openai>=1.0.0",
     "python-dotenv>=1.0.0",
     "uvicorn[standard]>=0.32.0",
+    "chainlit>=2.9.3",
 ]
 
 [tool.uv.sources]
