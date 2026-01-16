@@ -15,6 +15,15 @@ dependencies = [
     "chainlit>=2.9.3",
     "python-multipart>=0.0.21",
     "docling>=2.66.0",
+    "langchain-docling>=2.0.0",
+    "langchain-core>=1.2.2",
+    "langchain-huggingface>=1.2.0",
+    "langchain-milvus>=0.3.3",
+    "langchain-text-splitters>=1.1.0",
+    "sentence-transformers>=5.2.0",
+    "milvus-lite>=2.5.1",
+    "langchain-classic>=1.0.1",
+    "langchain-qdrant>=1.1.0",
 ]
 
 [tool.uv.sources]

@@ -1,0 +1,57 @@
+# Python
+**/__pycache__/
+**/*.pyc
+**/*.pyo
+**/*.pyd
+**/.Python
+**/*.so
+**/*.egg
+**/*.egg-info/
+**/dist/
+**/build/
+**/.pytest_cache/
+**/.mypy_cache/
+**/.ruff_cache/
+**/.coverage
+**/htmlcov/
+**/*.log
+
+# Virtual environments
+**/.venv/
+**/venv/
+**/env/
+**/ENV/
+
+# IDE and OS
+**/.DS_Store
+**/.vscode/
+**/.idea/
+**/*.swp
+**/*.swo
+**/*~
+
+# Git
+**/.git/
+**/.gitignore
+**/.gitattributes
+
+# Documentation (README.md is needed for package builds, so we don't exclude markdown files)
+# **/README.md
+# **/*.md
+
+# Chainlit
+**/.chainlit
+**/.files
+
+# Uploads and staging
+**/uploads/
+**/staging/
+
+# Lock files (we copy them explicitly in Dockerfile)
+# **/uv.lock
+
+# Other
+**/.env
+**/.env.local
+**/.env.*.local
+

@@ -19,3 +19,9 @@ htmlcov/
 .git/
 .gitignore
 README.md
+
+**/__pycache__/
+
+
+.chainlit
+.files
