@@ -2,6 +2,8 @@ from pathlib import Path
 from typing import List, Dict, Any
 import logging
 from docling.document_converter import DocumentConverter
+from langchain.chat_models import init_chat_model
+from langchain_core.messages import HumanMessage, SystemMessage
 
 logger = logging.getLogger(__name__)
 
@@ -71,9 +73,12 @@ class DocumentProcessor:
             # Create overlapping chunks
             chunks = []
             for section in sections:
+                section_summary = self._generate_section_summary(section['content'])
+                
                 section_chunks = self._create_overlapping_chunks(
                     section['content'],
-                    section['title']
+                    section['title'],
+                    section_context=section_summary
                 )
                 chunks.extend(section_chunks)
 
@@ -83,6 +88,33 @@ class DocumentProcessor:
         except Exception as e:
             logger.error(f"Error processing document {file_path}: {str(e)}")
             raise
+
+    def _generate_section_summary(self, content: str) -> str:
+        """
+        Generate a summary of the section using OpenAI via LangChain.
+
+        Args:
+            content: The content of the section to summarize.
+
+        Returns:
+            A concise summary string.
+        """
+        if not content.strip():
+            return ""
+
+        try:
+            model = init_chat_model("gpt-3.5-turbo", model_provider="openai")
+            
+            messages = [
+                SystemMessage(content="Jesteś pomocnym asystentem, który potrafi zwięźle podsumowywać tekst."),
+                HumanMessage(content=f"Streszcz poniższą sekcję w kilku słowach, przedstawiając najważniejsze informacje:\n\n{content}")
+            ]
+            
+            response = model.invoke(messages)
+            return response.content.strip()
+        except Exception as e:
+            logger.warning(f"Failed to generate summary for section: {e}")
+            return ""
 
     def _extract_sections(self, doc: Any) -> List[Dict[str, str]]:
         """
@@ -132,7 +164,8 @@ class DocumentProcessor:
     def _create_overlapping_chunks(
         self,
         text: str,
-        section_title: str
+        section_title: str,
+        section_context: str = ""
     ) -> List[DocumentChunk]:
         """
         Split text into overlapping chunks.
@@ -140,6 +173,7 @@ class DocumentProcessor:
         Args:
             text: Text to split
             section_title: Title of the section
+            section_context: Summary of the section context
 
         Returns:
             List of document chunks with overlap
@@ -181,7 +215,8 @@ class DocumentProcessor:
                 metadata={
                     'start_pos': start,
                     'end_pos': start + len(chunk_text),
-                    'has_overlap': chunk_index > 0
+                    'has_overlap': chunk_index > 0,
+                    'context': section_context
                 }
             ))
 
