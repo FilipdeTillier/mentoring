@@ -1,6 +1,7 @@
 from pathlib import Path
 from typing import List, Dict, Any
 import logging
+import asyncio
 from docling.document_converter import DocumentConverter
 from langchain.chat_models import init_chat_model
 from langchain_core.messages import HumanMessage, SystemMessage
@@ -60,7 +61,7 @@ class DocumentProcessor:
             logger.info(f"Processing document: {file_path}")
 
             # Convert document using Docling
-            result = self.converter.convert(str(file_path))
+            result = await asyncio.to_thread(self.converter.convert, str(file_path))
             doc = result.document
 
             # Export as markdown to see what we got
@@ -78,7 +79,8 @@ class DocumentProcessor:
                 section_chunks = self._create_overlapping_chunks(
                     section['content'],
                     section['title'],
-                    section_context=section_summary
+                    section_context=section_summary,
+                    filename=file_path.name
                 )
                 chunks.extend(section_chunks)
 
@@ -165,7 +167,8 @@ class DocumentProcessor:
         self,
         text: str,
         section_title: str,
-        section_context: str = ""
+        section_context: str = "",
+        filename: str = ""
     ) -> List[DocumentChunk]:
         """
         Split text into overlapping chunks.
@@ -174,6 +177,7 @@ class DocumentProcessor:
             text: Text to split
             section_title: Title of the section
             section_context: Summary of the section context
+            filename: Name of the file being processed
 
         Returns:
             List of document chunks with overlap
@@ -216,7 +220,8 @@ class DocumentProcessor:
                     'start_pos': start,
                     'end_pos': start + len(chunk_text),
                     'has_overlap': chunk_index > 0,
-                    'context': section_context
+                    'context': section_context,
+                    'filename': filename
                 }
             ))
 
