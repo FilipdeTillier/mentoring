@@ -11,7 +11,9 @@ services:
       - PYTHONUNBUFFERED=1
       - PYTHONPATH=/app
       - MLFLOW_TRACKING_URI=http://mlflow:5000
+      - MLFLOW_TRACKING_URI=http://mlflow:5000
       - MLFLOW_EXPERIMENT_NAME=llm-requests
+      - QDRANT_HOST=qdrant
     volumes:
       - ./app:/app/app
     restart: unless-stopped

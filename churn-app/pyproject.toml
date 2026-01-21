@@ -16,6 +16,7 @@ dependencies = [
     "mlflow>=2.10.0",
     "docling>=2.0.0",
     "python-multipart>=0.0.6",
+    "qdrant-client[fastembed]>=1.7.0",
 ]
 
 [tool.uv.sources]

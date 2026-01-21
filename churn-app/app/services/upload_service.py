@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 
 from app.services.document_processor import DocumentProcessor
+from app.services.qdrant_service import QdrantService
 
 logger = logging.getLogger(__name__)
 
@@ -83,10 +84,15 @@ async def process_saved_files(
                 results['files_processed'] += 1
                 results['total_chunks'] += len(chunks)
 
-                # TODO: Store chunks in vector database (Qdrant)
-                # This is where you would insert chunks into your vector store
-                # Example:
-                # await vector_store.insert_chunks(chunks, job_id, file.filename)
+                # Save chunks to Qdrant
+                try:
+                    qdrant_service = QdrantService()
+                    qdrant_service.upsert_chunks(job_id, chunks)
+                    print(f"[BACKGROUND JOB] Stored chunks in Qdrant for {file_path.name}", flush=True)
+                except Exception as q_error:
+                    logger.error(f"Failed to save chunks to Qdrant for {file_path.name}: {q_error}")
+                    # We don't fail the whole job if vector store fails, but we should log it
+                    file_result['error'] = f"Processed but vector store failed: {q_error}"
 
             except Exception as file_error:
                 logger.error(f"Error processing file {file_path.name}: {str(file_error)}")
