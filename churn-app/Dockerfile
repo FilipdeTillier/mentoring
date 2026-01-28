@@ -6,6 +6,11 @@ ENV UV_COMPILE_BYTECODE=1 \
     UV_LINK_MODE=copy \
     PYTHONUNBUFFERED=1
 
+RUN apt-get update && apt-get install -y \
+    libgl1 \
+    libglib2.0-0 \
+    && rm -rf /var/lib/apt/lists/*
+
 COPY churn-lib/ /churn-lib/
 
 COPY churn-app/pyproject.toml churn-app/uv.lock ./
@@ -20,6 +25,8 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 
 ENV PATH="/app/.venv/bin:$PATH"
 
-EXPOSE 8000
+RUN chmod +x start.sh
 
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+EXPOSE 8000 4001
+
+CMD ["./start.sh"]

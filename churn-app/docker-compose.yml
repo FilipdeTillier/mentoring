@@ -11,9 +11,9 @@ services:
       - PYTHONUNBUFFERED=1
       - PYTHONPATH=/app
       - MLFLOW_TRACKING_URI=http://mlflow:5000
-      - MLFLOW_TRACKING_URI=http://mlflow:5000
       - MLFLOW_EXPERIMENT_NAME=llm-requests
       - QDRANT_HOST=qdrant
+      - OLLAMA_HOST=http://ollama:11434
     volumes:
       - ./app:/app/app
     restart: unless-stopped
@@ -56,6 +56,18 @@ services:
     networks:
       - rag_network
 
+  ollama:
+    image: ollama/ollama:latest
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    environment:
+      - OLLAMA_HOST=0.0.0.0
+    restart: unless-stopped
+    networks:
+      - rag_network
+
 networks:
   rag_network:
     driver: bridge
@@ -64,5 +76,7 @@ volumes:
   qdrant_data:
     driver: local
   mlflow_data:
+    driver: local
+  ollama_data:
     driver: local
   uploads:

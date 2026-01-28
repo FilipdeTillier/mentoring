@@ -6,13 +6,14 @@ import mlflow
 from langchain.chat_models import init_chat_model
 
 from app.helpers.message_categorizer import categorize_messages
+from app.const import DEFAULT_MODEL
 
 mlflow.set_tracking_uri(os.getenv("MLFLOW_TRACKING_URI", "http://mlflow:5000"))
 mlflow.set_experiment("llm-requests")
 
 
 def chat_with_openai(
-    choices: List[Dict[str, str]], model: str = "gpt-3.5-turbo"
+    choices: List[Dict[str, str]], model: str = DEFAULT_MODEL
 ) -> Dict[str, Any]:
     api_key = os.getenv("OPENAI_API_KEY")
     if not api_key:

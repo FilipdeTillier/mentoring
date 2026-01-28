@@ -1,5 +1,8 @@
 # Churn App - FastAPI Demo
 
+Run front end 
+uv run chainlit run app.py --port 4000 
+
 A demonstration FastAPI application showcasing best practices for building production-ready APIs with proper project structure, Docker containerization, and clean architecture.
 
 ## 📋 Table of Contents

@@ -5,6 +5,7 @@ from app.models.openai import Message, ChatRequest, ChatResponse
 from app.services.chat_service import chat_with_openai
 from app.services.ollama_service import chat_with_ollama, list_available_models, pull_model
 from app.services.llm_service import check_ollama_health
+from app.models.ollama import OllamaModelsResponse, OllamaPullRequest, OllamaPullResponse, OllamaHealthResponse
 from app.services.qdrant_service import QdrantService
 from app.const import DEFAULT_MODEL
 
@@ -97,7 +98,7 @@ async def chat_endpoint(request: ChatRequest):
         for msg in request.choices:
             if msg.role != "system":
                 messages_dict.append({"role": msg.role, "content": msg.content})
-
+                
         if request.local_llm:
             result = chat_with_ollama(
                 choices=messages_dict,

@@ -1,4 +1,4 @@
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 import logging
 import json
 from pathlib import Path
@@ -12,8 +12,7 @@ logger = logging.getLogger(__name__)
 async def process_saved_files(
     job_id: str,
     file_paths: List[Path],
-    chunk_size: int = 1000,
-    chunk_overlap: int = 200
+    local_llm: Optional[str] = None,
 ) -> Dict[str, Any]:
     """
     Background task to process already-saved files with Docling.
@@ -21,26 +20,23 @@ async def process_saved_files(
     This function runs AFTER the response is sent to the user.
     It processes files that were already saved to disk:
     1. Processes each file with Docling
-    2. Splits content by sections
-    3. Creates overlapping chunks
+    2. Splits content by sections/paragraphs using docling's native structure
+    3. Creates paragraph-based chunks with section context
 
     Args:
         job_id: Unique identifier for this job
         file_paths: List of paths to already-saved files
-        chunk_size: Size of each chunk in characters (default: 1000)
-        chunk_overlap: Number of overlapping characters (default: 200)
+        local_llm: Optional Ollama model name. If provided, uses local Ollama
+                  instead of OpenAI for context and keyword generation.
 
     Returns:
         Dictionary with processing results
     """
-    print(f"[BACKGROUND JOB] Starting job {job_id} with {len(file_paths)} files", flush=True)
-    logger.info(f"Starting job {job_id} with {len(file_paths)} files")
+    llm_provider = f"Ollama ({local_llm})" if local_llm else "OpenAI"
+    print(f"[BACKGROUND JOB] Starting job {job_id} with {len(file_paths)} files using {llm_provider}", flush=True)
+    logger.info(f"Starting job {job_id} with {len(file_paths)} files using {llm_provider}")
 
-    # Initialize processor
-    processor = DocumentProcessor(
-        chunk_size=chunk_size,
-        chunk_overlap=chunk_overlap
-    )
+    processor = DocumentProcessor(local_llm=local_llm)
 
     results = {
         'job_id': job_id,
@@ -86,11 +82,15 @@ async def process_saved_files(
 
                 # Save chunks to Qdrant
                 try:
+                    logger.info(f"Starting embedding and Qdrant storage for {len(chunks)} chunks from {file_path.name}")
+                    print(f"[BACKGROUND JOB] Starting embedding and Qdrant storage for {file_path.name}...", flush=True)
                     qdrant_service = QdrantService()
-                    qdrant_service.upsert_chunks(job_id, chunks)
+                    qdrant_service.upsert_chunks(job_id, chunks, local_llm=local_llm)
+                    logger.info(f"Successfully completed embedding and stored {len(chunks)} chunks in Qdrant for {file_path.name}")
                     print(f"[BACKGROUND JOB] Stored chunks in Qdrant for {file_path.name}", flush=True)
                 except Exception as q_error:
                     logger.error(f"Failed to save chunks to Qdrant for {file_path.name}: {q_error}")
+                    print(f"[BACKGROUND JOB] Failed to store chunks in Qdrant for {file_path.name}: {q_error}", flush=True)
                     # We don't fail the whole job if vector store fails, but we should log it
                     file_result['error'] = f"Processed but vector store failed: {q_error}"
 
